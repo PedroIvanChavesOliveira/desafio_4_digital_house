@@ -1,9 +1,111 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.activity.LoginActivity">
+    android:fillViewport="true">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".view.activity.LoginActivity"
+        android:background="@color/teal_700">
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvLogInInformations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilEmail"
+                    style="@style/TextInputDefault"
+                    android:layout_margin="10dp"
+                    android:hint="@string/string_email"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/tilPassword">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tietEmail"
+                        android:inputType="textEmailAddress"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:tag="@string/string_email"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilPassword"
+                    style="@style/TextInputDefault"
+                    android:layout_marginBottom="10dp"
+                    android:hint="@string/string_password"
+                    app:layout_constraintStart_toStartOf="@id/tilEmail"
+                    app:layout_constraintEnd_toEndOf="@id/tilEmail"
+                    app:layout_constraintBottom_toBottomOf="@+id/cbRemember"
+                    app:layout_constraintTop_toBottomOf="@id/tilEmail">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tietPassword"
+                        android:inputType="textPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:tag="@string/string_password"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <CheckBox
+                    android:id="@+id/cbRemember"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:checked="false"
+                    android:textSize="18sp"
+                    android:buttonTint="@color/teal_200"
+                    android:text="@string/string_remember"
+                    app:layout_constraintStart_toStartOf="@id/tilEmail"
+                    app:layout_constraintTop_toBottomOf="@id/tilPassword"
+                    />
+
+                <Button
+                    android:id="@+id/btLogIn"
+                    style="@style/ButtonDefault"
+                    android:layout_marginTop="20dp"
+                    android:text="@string/string_login"
+                    app:layout_constraintStart_toStartOf="@id/tilEmail"
+                    app:layout_constraintEnd_toEndOf="@id/tilEmail"
+                    app:layout_constraintTop_toBottomOf="@id/cbRemember"
+                    />
+
+                <Button
+                    android:id="@+id/tbRegister"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:text="@string/string_create_account"
+                    android:textColor="@color/black"
+                    app:layout_constraintStart_toStartOf="@id/btLogIn"
+                    app:layout_constraintEnd_toEndOf="@id/btLogIn"
+                    app:layout_constraintTop_toBottomOf="@id/btLogIn"
+                    app:layout_constraintBottom_toBottomOf="parent"/>
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>
