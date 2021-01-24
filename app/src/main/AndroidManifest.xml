@@ -9,10 +9,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Desafio_4">
-        <activity android:name=".view.activity.UpdateGameActivity"/>
-        <activity android:name=".view.activity.GameDescriptionActivity" />
-        <activity android:name=".view.activity.InsertGameActivity" />
-        <activity android:name=".view.activity.HomeActivity" >
+        <activity android:name=".view.activity.GameDescriptionActivity"/>
+        <activity android:name=".view.activity.AddAndEditGameActivity"/>
+        <activity android:name=".view.activity.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

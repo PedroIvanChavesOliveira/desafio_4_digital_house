@@ -1,9 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".view.activity.GameDescriptionActivity">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".view.activity.GameDescriptionActivity">
+
+
+        <ImageView
+            android:id="@+id/ivGamePoster"
+            style="@style/ImageViewGameDescription"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <ImageView
+            android:id="@+id/ivArrowBack"
+            style="@style/ArrowBackDefault"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+
+        <TextView
+            android:id="@+id/tvGameName"
+            style="@style/TextViewGameDescription"
+            android:text="@string/string_game_name_placeholder"
+            app:layout_constraintStart_toStartOf="@id/ivArrowBack"
+            app:layout_constraintBottom_toBottomOf="@id/ivGamePoster"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabGameDescription"
+            style="@style/FabButtonDefault"
+            android:src="@drawable/ic_baseline_create_20"
+            app:layout_constraintTop_toBottomOf="@id/ivGamePoster"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="@id/ivGamePoster"/>
+
+        <TextView
+            android:id="@+id/tvGameNameTitle"
+            style="@style/TextViewGameTitle"
+            android:layout_marginTop="10dp"
+            android:textColor="@color/black"
+            android:text="@string/string_game_name_placeholder"
+            app:layout_constraintStart_toStartOf="@id/ivArrowBack"
+            app:layout_constraintTop_toBottomOf="@id/ivGamePoster"
+            app:layout_constraintBottom_toTopOf="@id/tvGameRelease"/>
+
+        <TextView
+            android:id="@+id/tvGameRelease"
+            style="@style/TextViewGameTitle"
+            android:textSize="16sp"
+            android:text="@string/string_game_release_placeholder"
+            app:layout_constraintStart_toStartOf="@id/ivArrowBack"
+            app:layout_constraintTop_toBottomOf="@id/tvGameNameTitle"
+            app:layout_constraintBottom_toTopOf="@id/tvGameDescription"/>
+
+        <TextView
+            android:id="@+id/tvGameDescription"
+            style="@style/TextViewGameTitle"
+            android:layout_marginTop="20dp"
+            android:layout_marginEnd="20dp"
+            android:text="@string/string_game_description_placeholder"
+            app:layout_constraintStart_toStartOf="@id/ivArrowBack"
+            app:layout_constraintTop_toBottomOf="@id/tvGameRelease"
+            app:layout_constraintEnd_toEndOf="parent"
+            />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

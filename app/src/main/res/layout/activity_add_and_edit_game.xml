@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fillViewport="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:context=".view.activity.AddAndEditGameActivity"
+        android:background="@color/teal_700">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/ivGamePhoto"
+            style="@style/ImageViewAddAndEditGame"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/cvAddAndEditGame"/>
+
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cvAddAndEditGame"
+            style="@style/CardViewDefault"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilNameGame"
+                    style="@style/TextInputDefault"
+                    android:layout_margin="10dp"
+                    android:hint="@string/string_name_game"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toTopOf="@id/tilReleaseDataGame">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tietNameGame"
+                        android:inputType="text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:tag="@string/string_name_game"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilReleaseDataGame"
+                    style="@style/TextInputDefault"
+                    android:layout_marginBottom="10dp"
+                    android:hint="@string/string_game_release"
+                    app:layout_constraintStart_toStartOf="@id/tilNameGame"
+                    app:layout_constraintEnd_toEndOf="@id/tilNameGame"
+                    app:layout_constraintBottom_toTopOf="@+id/tilDescriptionGame"
+                    app:layout_constraintTop_toBottomOf="@id/tilNameGame">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tietReleaseDataGame"
+                        android:inputType="text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:tag="@string/string_game_release"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/tilDescriptionGame"
+                    style="@style/TextInputDefault"
+                    android:hint="@string/string_description"
+                    app:layout_constraintStart_toStartOf="@id/tilNameGame"
+                    app:layout_constraintEnd_toEndOf="@id/tilNameGame"
+                    app:layout_constraintBottom_toTopOf="@+id/btSaveGame"
+                    app:layout_constraintTop_toBottomOf="@id/tilNameGame">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/tietDescriptionGame"
+                        android:inputType="text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:tag="@string/string_description"
+                        />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <Button
+                    android:id="@+id/btSaveGame"
+                    style="@style/ButtonDefault"
+                    android:text="@string/string_save_game"
+                    android:layout_marginBottom="10dp"
+                    app:layout_constraintStart_toStartOf="@id/tilNameGame"
+                    app:layout_constraintEnd_toEndOf="@id/tilNameGame"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</ScrollView>

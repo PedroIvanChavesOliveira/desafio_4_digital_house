@@ -7,4 +7,12 @@
     <string name="string_create_account">Criar conta</string>
     <string name="string_name">Nome</string>
     <string name="string_confirm_password">Confirmar senha</string>
+    <string name="string_game_name_placeholder">Game Name</string>
+    <string name="string_game_description_placeholder">Descrição do Game</string>
+    <string name="string_game_release_placeholder">Lançamento xxxx</string>
+    <string name="string_name_game">Nome do Jogo</string>
+    <string name="string_game_release">Lançamento do Jogo</string>
+    <string name="string_description">Descrição</string>
+    <string name="string_save_game">Salvar Jogo</string>
+    <string name="string_search_game">Pesquise um Jogo</string>
 </resources>

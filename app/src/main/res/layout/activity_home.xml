@@ -12,15 +12,22 @@
         tools:context=".view.activity.HomeActivity"
         android:background="@color/teal_700">
 
-        <SearchView
-            android:id="@+id/svHome"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:background="@color/white"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/tilSearchGame"
+            style="@style/TextInputSearchHome"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/tietSearchGame"
+                android:inputType="textFilter"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:tag="@string/string_search_game"
+                />
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvHome"
@@ -29,17 +36,13 @@
             android:layout_marginTop="10dp"
             tools:listitem="@layout/recycler_view_games"
             tools:itemCount="2"
-            app:layout_constraintTop_toBottomOf="@id/svHome"
-            app:layout_constraintStart_toStartOf="@+id/svHome"
-            app:layout_constraintEnd_toEndOf="@+id/svHome"/>
+            app:layout_constraintTop_toBottomOf="@id/tilSearchGame"
+            app:layout_constraintStart_toStartOf="@+id/tilSearchGame"
+            app:layout_constraintEnd_toEndOf="@+id/tilSearchGame"/>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabHome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:backgroundTint="@color/teal_200"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_baseline_add_20"
+            style="@style/FabButtonDefault"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
 
