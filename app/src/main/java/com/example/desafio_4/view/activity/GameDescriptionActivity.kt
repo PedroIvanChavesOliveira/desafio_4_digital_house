@@ -7,10 +7,14 @@ import com.example.desafio_4.databinding.ActivityGameDescriptionBinding
 
 class GameDescriptionActivity : AppCompatActivity() {
     private lateinit var binding: ActivityGameDescriptionBinding
+    private var getId = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityGameDescriptionBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        getId = intent.getStringExtra("id").toString()
+        getId
     }
 }

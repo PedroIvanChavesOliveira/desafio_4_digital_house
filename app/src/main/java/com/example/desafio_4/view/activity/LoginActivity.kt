@@ -49,6 +49,7 @@ class LoginActivity : AppCompatActivity() {
                 putString(EMAIL_SHAREDPREFERENCE, textInputEmail)
                 putString(PASSWORD_SHAREDPREFERENCE, textInputPassword)
             }
+            finish()
         }
         binding.btLogIn.setOnClickListener {
             logInAccount(binding.tietEmail.text.toString(), binding.tietPassword.text.toString())

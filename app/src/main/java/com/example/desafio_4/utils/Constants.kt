@@ -7,8 +7,12 @@ class Constants {
         const val CHECKED_SHAREDPREFERENCE = "checked"
         const val NAME_SHAREDPREFERENCE = "sharedPreferencesLogIn"
     }
+    object GameList {
+        const val ID_GAME = "id"
+    }
 
-    object LogInFirebase {
-        const val RC_SIGN_IN = 999
+    object Firebase {
+        const val DATABASE_USERS = "users"
+        const val DATABASE_GAMES = "gamesList"
     }
 }
