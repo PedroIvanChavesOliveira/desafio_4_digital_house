@@ -16,5 +16,7 @@
     <string name="string_save_game">Salvar Jogo</string>
     <string name="string_search_game">Pesquise um Jogo</string>
     <string name="validationEmail">O e-mail deve ser válido</string>
+    <string name="validationConfirmPassword">Senha Inválida</string>
     <string name="string_error_message">O campo %1$s é obrigatório</string>
+    <string name="string_log_out">Log Out</string>
 </resources>

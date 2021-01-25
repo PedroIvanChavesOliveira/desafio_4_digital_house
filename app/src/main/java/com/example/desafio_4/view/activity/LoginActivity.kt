@@ -10,15 +10,21 @@ import android.widget.EditText
 import androidx.core.content.edit
 import androidx.core.widget.doOnTextChanged
 import com.example.desafio_4.R
-import com.example.desafio_4.constants.Constants.SharedPreferences.CHECKED_SHAREDPREFERENCE
-import com.example.desafio_4.constants.Constants.SharedPreferences.EMAIL_SHAREDPREFERENCE
-import com.example.desafio_4.constants.Constants.SharedPreferences.NAME_SHAREDPREFERENCE
-import com.example.desafio_4.constants.Constants.SharedPreferences.PASSWORD_SHAREDPREFERENCE
+import com.example.desafio_4.utils.Constants.SharedPreferences.CHECKED_SHAREDPREFERENCE
+import com.example.desafio_4.utils.Constants.SharedPreferences.EMAIL_SHAREDPREFERENCE
+import com.example.desafio_4.utils.Constants.SharedPreferences.NAME_SHAREDPREFERENCE
+import com.example.desafio_4.utils.Constants.SharedPreferences.PASSWORD_SHAREDPREFERENCE
 import com.example.desafio_4.databinding.ActivityLoginBinding
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+    private val firebaseAuth by lazy {
+        Firebase.auth
+    }
     private var sharedPreferences: SharedPreferences? = null
     private var emailCheck = false
     private var passwordCheck = false
@@ -36,7 +42,7 @@ class LoginActivity : AppCompatActivity() {
         validatingEditText(binding.tietEmail, binding.tilEmail, R.string.string_email)
         validatingEditText(binding.tietPassword, binding.tilPassword, R.string.string_password)
 
-        binding.tbRegister.setOnClickListener {
+        binding.btRegister.setOnClickListener {
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
             sharedPreferences?.edit {
@@ -45,8 +51,7 @@ class LoginActivity : AppCompatActivity() {
             }
         }
         binding.btLogIn.setOnClickListener {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
+            logInAccount(binding.tietEmail.text.toString(), binding.tietPassword.text.toString())
             sharedPreferences?.edit {
                 putString(EMAIL_SHAREDPREFERENCE, textInputEmail)
                 putString(PASSWORD_SHAREDPREFERENCE, textInputPassword)
@@ -62,6 +67,36 @@ class LoginActivity : AppCompatActivity() {
         }
 
         initComponents()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val currentUser = firebaseAuth.currentUser
+        updateUI(currentUser)
+    }
+
+    private fun logInAccount(email: String, password: String) {
+        if(!activatingButtonLogin()){
+            return
+        }
+
+        firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) {task ->
+            if(task.isSuccessful) {
+                val user = firebaseAuth.currentUser
+                updateUI(user)
+                val intent = Intent(this, HomeActivity::class.java)
+                startActivity(intent)
+            }else {
+                updateUI(null)
+            }
+        }
+    }
+
+    private fun updateUI(user: FirebaseUser?) {
+        if(user != null) {
+            val intent = Intent(this, HomeActivity::class.java)
+            startActivity(intent)
+        }
     }
 
     private fun initComponents() {

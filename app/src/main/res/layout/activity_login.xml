@@ -89,7 +89,7 @@
                     />
 
                 <Button
-                    android:id="@+id/tbRegister"
+                    android:id="@+id/btRegister"
                     style="@style/Widget.MaterialComponents.Button.TextButton"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"

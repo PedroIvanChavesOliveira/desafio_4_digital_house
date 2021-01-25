@@ -1,4 +1,4 @@
-package com.example.desafio_4.constants
+package com.example.desafio_4.utils
 
 class Constants {
     object SharedPreferences{
@@ -6,5 +6,9 @@ class Constants {
         const val PASSWORD_SHAREDPREFERENCE = "password"
         const val CHECKED_SHAREDPREFERENCE = "checked"
         const val NAME_SHAREDPREFERENCE = "sharedPreferencesLogIn"
+    }
+
+    object LogInFirebase {
+        const val RC_SIGN_IN = 999
     }
 }
