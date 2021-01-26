@@ -20,4 +20,5 @@
     <string name="validationPassword">A senha deve ter mais de 6 caracteres</string>
     <string name="string_error_message">O campo %1$s é obrigatório</string>
     <string name="string_log_out">Log Out</string>
+    <string name="string_take_photo">Tirar Foto</string>
 </resources>

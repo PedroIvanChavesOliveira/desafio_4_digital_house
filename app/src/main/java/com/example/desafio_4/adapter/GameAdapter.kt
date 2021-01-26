@@ -1,9 +1,15 @@
 package com.example.desafio_4.adapter
 
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.desafio_4.databinding.RecyclerViewGamesBinding
+import com.example.desafio_4.utils.Constants.AdapterFields.PHOTO
+import com.example.desafio_4.utils.Constants.AdapterFields.RELEASE
+import com.example.desafio_4.utils.Constants.AdapterFields.TITLE
 import com.google.firebase.firestore.DocumentSnapshot
 
 class GameAdapter(
@@ -26,8 +32,9 @@ class GameAdapter(
 
     class ViewHolder(private val binding: RecyclerViewGamesBinding): RecyclerView.ViewHolder(binding.root) {
         fun bind(doc: DocumentSnapshot, onItemClick: (DocumentSnapshot) -> Unit) = with(binding) {
-            binding.tvTitleGames.text = doc["title"].toString()
-            binding.tvYearGames.text = doc["release"].toString()
+            binding.tvTitleGames.text = doc[TITLE].toString()
+            binding.tvYearGames.text = doc[RELEASE].toString()
+            Glide.with(itemView.context).load(doc[PHOTO]).into(binding.imageViewGamesRV)
 
             itemView.setOnClickListener {
                 onItemClick(doc)

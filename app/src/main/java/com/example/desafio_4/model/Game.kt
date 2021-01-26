@@ -1,5 +1,6 @@
 package com.example.desafio_4.model
 
+import android.net.Uri
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 
