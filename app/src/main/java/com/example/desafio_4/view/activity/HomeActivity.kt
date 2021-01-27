@@ -1,12 +1,12 @@
 package com.example.desafio_4.view.activity
 
+import android.app.Activity
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
-import androidx.core.widget.addTextChangedListener
-import androidx.core.widget.doOnTextChanged
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.desafio_4.adapter.GameAdapter
 import com.example.desafio_4.databinding.ActivityHomeBinding
@@ -16,10 +16,12 @@ import com.example.desafio_4.utils.Constants.Firebase.DATABASE_GAMES
 import com.example.desafio_4.utils.Constants.Firebase.DATABASE_USERS
 import com.example.desafio_4.utils.Constants.Firebase.ID_GAME
 import com.example.desafio_4.utils.Constants.Firebase.ORIGIN_INTENT
+import com.example.desafio_4.utils.Constants.VoiceRecognation.REQUEST_CODE
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
+
 
 class HomeActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHomeBinding
@@ -51,11 +53,31 @@ class HomeActivity : AppCompatActivity() {
             finish()
         }
 
+        binding.tilSearchGame.setEndIconOnClickListener {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Voice searching...")
+            startActivityForResult(intent, REQUEST_CODE)
+        }
+
         if(start == 0) {
             setUpRecyclerView(null)
             start++
         }
         searchGame()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if(requestCode == REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val getString = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            getString?.let {
+                if(getString.isNotEmpty()) {
+                    val query = getString[0]
+                    binding.tietSearchGame.setText(query.toLowerCase())
+                }
+            }
+        }
     }
 
     private fun searchGame() {
