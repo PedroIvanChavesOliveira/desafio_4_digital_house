@@ -47,7 +47,7 @@ class AddAndEditGameActivity : AppCompatActivity() {
         getId = intent.getStringExtra(ID_GAME).toString()
         getOrigin = intent.getIntExtra(ORIGIN_INTENT, 0)
 
-        if(getOrigin == 2) {
+        if(getOrigin == 2 || getOrigin == 3) {
             setUpGameInfo()
         }
 
@@ -56,6 +56,7 @@ class AddAndEditGameActivity : AppCompatActivity() {
             when(getOrigin) {
                 1 -> addNewGame()
                 2 -> editGame()
+                3 -> fromCamera()
             }
         }
 
@@ -65,6 +66,36 @@ class AddAndEditGameActivity : AppCompatActivity() {
             intent.putExtra(ORIGIN_INTENT, getOrigin)
             startActivity(intent)
         }
+    }
+
+    private fun fromCamera() {
+        db.collection(DATABASE_GAMES).orderBy(ID)
+                .get()
+                .addOnSuccessListener {
+                    val id = getId.toInt()
+                    firebaseStorageRef.child(
+                            "${(firebaseAuth.currentUser?.uid ?: "")}/${id}gamePhoto.jpg"
+                    ).downloadUrl.addOnSuccessListener {uri ->
+                        val game = Game(id, uri.toString(), binding.tietDescriptionGame.text.toString(),
+                                binding.tietReleaseDataGame.text.toString(),
+                                binding.tietNameGame.text.toString()
+                        )
+
+                        db.collection(DATABASE_GAMES).document("$id")
+                                .set(game)
+                                .addOnSuccessListener {
+                                    val intent = Intent(this, HomeActivity::class.java)
+                                    startActivity(intent)
+                                    finish()
+                                }
+                                .addOnFailureListener{
+                                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
+                                }
+                    }
+                }
+                .addOnFailureListener{
+                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
+                }
     }
 
     private fun addNewGame() {
@@ -85,6 +116,7 @@ class AddAndEditGameActivity : AppCompatActivity() {
                         .addOnSuccessListener {
                             val intent = Intent(this, HomeActivity::class.java)
                             startActivity(intent)
+                            finish()
                         }
                         .addOnFailureListener{
                             Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
@@ -112,8 +144,9 @@ class AddAndEditGameActivity : AppCompatActivity() {
                     db.collection(DATABASE_GAMES).document("$id")
                         .set(game, SetOptions.merge())
                         .addOnSuccessListener {
-                            val intent = Intent(this, HomeActivity::class.java)
+                            val intent = Intent(this, GameDescriptionActivity::class.java)
                             startActivity(intent)
+                            finish()
                         }
                         .addOnFailureListener{
                             Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
@@ -128,12 +161,14 @@ class AddAndEditGameActivity : AppCompatActivity() {
     private fun setUpGameInfo() {
         db.collection(DATABASE_GAMES).whereEqualTo(ID, getId.toInt())
             .get()
-            .addOnSuccessListener {
-                it.documents.forEach { doc ->
-                    binding.tietNameGame.setText(doc[TITLE].toString())
-                    binding.tietReleaseDataGame.setText(doc[RELEASE].toString())
-                    binding.tietDescriptionGame.setText(doc[DESCRIPTION].toString())
-                    Glide.with(this).load(doc[PHOTO]).into(binding.ivGamePhoto)
+            .addOnSuccessListener {query ->
+                query.documents.let {
+                    it.forEach {doc ->
+                        binding.tietNameGame.setText(doc[TITLE].toString())
+                        binding.tietReleaseDataGame.setText(doc[RELEASE].toString())
+                        binding.tietDescriptionGame.setText(doc[DESCRIPTION].toString())
+                        Glide.with(this).load(doc[PHOTO]).into(binding.ivGamePhoto)
+                    }
                 }
             }.addOnFailureListener {  }
     }

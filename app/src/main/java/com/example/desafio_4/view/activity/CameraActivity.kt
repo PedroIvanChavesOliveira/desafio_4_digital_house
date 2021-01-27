@@ -1,6 +1,10 @@
 package com.example.desafio_4.view.activity
 
+import android.app.Activity
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -16,23 +20,30 @@ import androidx.core.content.ContextCompat
 import com.example.desafio_4.R
 import com.example.desafio_4.databinding.ActivityAddAndEditGameBinding
 import com.example.desafio_4.databinding.ActivityCameraBinding
+import com.example.desafio_4.model.Game
 import com.example.desafio_4.utils.Constants
+import com.example.desafio_4.utils.Constants.AdapterFields.ID
+import com.example.desafio_4.utils.Constants.AdapterFields.PHOTO
 import com.example.desafio_4.utils.Constants.CameraX.FILENAME_FORMAT
 import com.example.desafio_4.utils.Constants.CameraX.REQUEST_CODE_PERMISSIONS
 import com.example.desafio_4.utils.Constants.CameraX.REQUIRED_PERMISSIONS
 import com.example.desafio_4.utils.Constants.CameraX.TAG_CAMERA
+import com.example.desafio_4.utils.Constants.Firebase.DATABASE_GAMES
 import com.example.desafio_4.utils.Constants.Firebase.ID_GAME
 import com.example.desafio_4.utils.Constants.Firebase.ORIGIN_INTENT
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.storage.ktx.storage
 import kotlinx.android.synthetic.main.activity_camera.*
 import java.io.File
+import java.io.FileNotFoundException
 import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
+import kotlin.collections.HashMap
 
 class CameraActivity : AppCompatActivity() {
     private lateinit var binding: ActivityCameraBinding
@@ -60,7 +71,7 @@ class CameraActivity : AppCompatActivity() {
         getOrigin = intent.getIntExtra(ORIGIN_INTENT, 0)
 
         if(getOrigin == 1) {
-            db.collection(Constants.Firebase.DATABASE_GAMES).orderBy(Constants.AdapterFields.ID)
+            db.collection(DATABASE_GAMES).orderBy(ID)
                 .get()
                 .addOnSuccessListener {
                     getId = it.size().toString()
@@ -81,12 +92,43 @@ class CameraActivity : AppCompatActivity() {
         // Set up the listener for take photo button
         binding.cameraCaptureButton.setOnClickListener {
             takePhoto()
-            finish()
+        }
+
+        binding.btGallery.setOnClickListener {
+            val intent = Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+            startActivityForResult(intent, 0)
         }
 
         outputDirectory = getOutputDirectory()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        val targetUri = data?.data
+        if(resultCode == Activity.RESULT_OK) {
+            try {
+                targetUri?.let {
+                    val msg = "Foto salva com Sucesso!! Aguarde..."
+                    val gameUri = firebaseStorageRef.child(
+                            "${firebaseAuth.currentUser?.uid ?: ""}/${getId}gamePhoto.jpg"
+                    )
+
+                    gameUri.putFile(it).addOnSuccessListener {
+                        gameUri.downloadUrl.addOnSuccessListener {uri ->
+                            when(getOrigin) {
+                                1 -> { setUpByOrigin(true, false, uri) }
+                                2 -> { setUpByOrigin(false, true, uri) }
+                            }
+                        }
+                    }.addOnFailureListener {  }
+                    Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
+                }
+            } catch (exception: FileNotFoundException) {
+                exception.printStackTrace()
+            }
+        }
     }
 
     private fun takePhoto() {
@@ -112,13 +154,16 @@ class CameraActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
-                    val msg = "Photo capture succeeded: $savedUri"
+                    val msg = "Foto tirada com Sucesso!! Aguarde..."
                     val gamePhoto = firebaseStorageRef.child(
                         "${firebaseAuth.currentUser?.uid ?: ""}/$getId${savedUri.lastPathSegment}")
 
                     gamePhoto.putFile(savedUri).addOnSuccessListener {
-                        gamePhoto.downloadUrl.addOnSuccessListener {
-                            it.toString()
+                        gamePhoto.downloadUrl.addOnSuccessListener {uri ->
+                            when(getOrigin) {
+                                1 -> { setUpByOrigin(true, false, uri) }
+                                2 -> { setUpByOrigin(false, true, uri) }
+                            }
                         }
                     }.addOnFailureListener {  }
 
@@ -126,6 +171,32 @@ class CameraActivity : AppCompatActivity() {
                     Log.d(TAG_CAMERA, msg)
                 }
             })
+    }
+
+    private fun setUpByOrigin(game: Boolean, photo: Boolean, uri: Uri) {
+        if(game) {
+            val gameSet = Game(getId.toInt(), uri.toString(), "", "", "")
+            db.collection(DATABASE_GAMES).document("$getId")
+                    .set(gameSet, SetOptions.merge())
+                    .addOnSuccessListener {
+                        startAddGameActivity(3)
+                    }.addOnFailureListener {  }
+        }else {
+            val photoSet = hashMapOf(PHOTO to uri.toString())
+            db.collection(DATABASE_GAMES).document("$getId")
+                    .set(photoSet, SetOptions.merge())
+                    .addOnSuccessListener {
+                        startAddGameActivity(2)
+                    }.addOnFailureListener {  }
+        }
+    }
+
+    private fun startAddGameActivity(origin: Int) {
+        val intent = Intent(this@CameraActivity, AddAndEditGameActivity::class.java)
+        intent.putExtra(ORIGIN_INTENT, origin)
+        intent.putExtra(ID_GAME, getId)
+        startActivity(intent)
+        finish()
     }
 
     private fun startCamera() {

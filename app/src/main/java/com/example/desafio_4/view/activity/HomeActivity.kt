@@ -3,15 +3,21 @@ package com.example.desafio_4.view.activity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import androidx.core.widget.addTextChangedListener
+import androidx.core.widget.doOnTextChanged
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.desafio_4.adapter.GameAdapter
 import com.example.desafio_4.databinding.ActivityHomeBinding
 import com.example.desafio_4.utils.Constants.AdapterFields.ID
+import com.example.desafio_4.utils.Constants.AdapterFields.TITLE
 import com.example.desafio_4.utils.Constants.Firebase.DATABASE_GAMES
 import com.example.desafio_4.utils.Constants.Firebase.DATABASE_USERS
 import com.example.desafio_4.utils.Constants.Firebase.ID_GAME
 import com.example.desafio_4.utils.Constants.Firebase.ORIGIN_INTENT
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 
@@ -23,7 +29,8 @@ class HomeActivity : AppCompatActivity() {
     private val db by lazy {
         Firebase.firestore
     }
-
+    val docList = mutableListOf<DocumentSnapshot>()
+    var start = 0
     private val userRef = db.collection(DATABASE_USERS).document(firebaseAuth.currentUser?.uid ?: "")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,18 +51,54 @@ class HomeActivity : AppCompatActivity() {
             finish()
         }
 
-        setUpRecyclerView()
+        if(start == 0) {
+            setUpRecyclerView(null)
+            start++
+        }
+        searchGame()
     }
 
-    private fun setUpRecyclerView() {
+    private fun searchGame() {
+        binding.tietSearchGame.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(s: Editable?) {
+                setUpRecyclerView(s.toString())
+            }
+
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {  }
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {  }
+
+        })
+    }
+
+    private fun setUpRecyclerView(text: String?) {
         binding.rvHome.apply {
             layoutManager = GridLayoutManager(this@HomeActivity, 2)
             userRef.collection(DATABASE_GAMES).get()
                 .addOnSuccessListener {
-                    adapter = GameAdapter(it.documents) {doc ->
-                        val intent = Intent(this@HomeActivity, GameDescriptionActivity::class.java)
-                        intent.putExtra(ID_GAME, doc[ID].toString())
-                        startActivity(intent)
+                    it.documents.forEach {doc ->
+                        if(docList.size < it.size()) {
+                            docList.add(doc)
+                        }
+                    }
+                    val filteredList = ArrayList<DocumentSnapshot>()
+                    if(text.isNullOrBlank()) {
+                        adapter = GameAdapter(docList) {doc ->
+                            val intent = Intent(this@HomeActivity, GameDescriptionActivity::class.java)
+                            intent.putExtra(ID_GAME, doc[ID].toString())
+                            startActivity(intent)
+                        }
+                    }else {
+                        for(i in docList) {
+                            if(i[TITLE].toString().toLowerCase().contains(text.toLowerCase())) {
+                                filteredList.add(i)
+                            }
+                        }
+                        adapter = GameAdapter(filteredList) {doc ->
+                            val intent = Intent(this@HomeActivity, GameDescriptionActivity::class.java)
+                            intent.putExtra(ID_GAME, doc[ID].toString())
+                            startActivity(intent)
+                        }
                     }
                 }.addOnFailureListener {  }
         }
