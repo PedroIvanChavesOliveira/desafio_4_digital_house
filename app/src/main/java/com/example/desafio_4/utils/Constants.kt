@@ -28,7 +28,6 @@ class Constants {
         const val REQUEST_CODE_PERMISSIONS = 10
         val REQUIRED_PERMISSIONS = arrayOf(Manifest.permission.CAMERA)
     }
-
     object VoiceRecognation {
         const val REQUEST_CODE = 999
     }

@@ -9,22 +9,21 @@ import android.util.Patterns
 import android.widget.EditText
 import androidx.core.content.edit
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.example.desafio_4.R
 import com.example.desafio_4.utils.Constants.SharedPreferences.CHECKED_SHAREDPREFERENCE
 import com.example.desafio_4.utils.Constants.SharedPreferences.EMAIL_SHAREDPREFERENCE
 import com.example.desafio_4.utils.Constants.SharedPreferences.NAME_SHAREDPREFERENCE
 import com.example.desafio_4.utils.Constants.SharedPreferences.PASSWORD_SHAREDPREFERENCE
 import com.example.desafio_4.databinding.ActivityLoginBinding
+import com.example.desafio_4.viewModel.LoginViewModel
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
-    private val firebaseAuth by lazy {
-        Firebase.auth
-    }
+    private lateinit var viewModelLogin: LoginViewModel
     private var sharedPreferences: SharedPreferences? = null
     private var emailCheck = false
     private var passwordCheck = false
@@ -37,6 +36,7 @@ class LoginActivity : AppCompatActivity() {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModelLogin = ViewModelProvider(this).get(LoginViewModel::class.java)
         sharedPreferences = getSharedPreferences(NAME_SHAREDPREFERENCE, Context.MODE_PRIVATE)
 
         validatingEditText(binding.tietEmail, binding.tilEmail, R.string.string_email)
@@ -72,8 +72,9 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        val currentUser = firebaseAuth.currentUser
-        updateUI(currentUser)
+        viewModelLogin.login.observe(this) {
+            updateUI(it)
+        }
     }
 
     private fun logInAccount(email: String, password: String) {
@@ -81,15 +82,9 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        firebaseAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(this) {task ->
-            if(task.isSuccessful) {
-                val user = firebaseAuth.currentUser
-                updateUI(user)
-                val intent = Intent(this, HomeActivity::class.java)
-                startActivity(intent)
-            }else {
-                updateUI(null)
-            }
+        viewModelLogin.signInAuthentication(email, password)
+        viewModelLogin.login.observe(this) {
+            updateUI(it)
         }
     }
 
@@ -97,6 +92,7 @@ class LoginActivity : AppCompatActivity() {
         if(user != null) {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 
