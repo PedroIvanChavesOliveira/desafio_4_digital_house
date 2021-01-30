@@ -6,6 +6,8 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import androidx.core.net.toUri
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.bumptech.glide.Glide
 import com.example.desafio_4.databinding.ActivityAddAndEditGameBinding
 import com.example.desafio_4.model.Game
@@ -18,6 +20,7 @@ import com.example.desafio_4.utils.Constants.Firebase.DATABASE_GAMES
 import com.example.desafio_4.utils.Constants.Firebase.DATABASE_USERS
 import com.example.desafio_4.utils.Constants.Firebase.ID_GAME
 import com.example.desafio_4.utils.Constants.Firebase.ORIGIN_INTENT
+import com.example.desafio_4.viewModel.AddAndEditViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -27,15 +30,7 @@ import java.io.File
 
 class AddAndEditGameActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddAndEditGameBinding
-    private val db by lazy {
-        Firebase.firestore.collection(DATABASE_USERS).document(firebaseAuth.currentUser?.uid ?: "")
-    }
-    private val firebaseAuth by lazy {
-        Firebase.auth
-    }
-    private val firebaseStorageRef by lazy {
-        Firebase.storage.reference
-    }
+    private lateinit var viewModelAddAndEdit: AddAndEditViewModel
     var getId = ""
     var getOrigin = 0
 
@@ -44,6 +39,7 @@ class AddAndEditGameActivity : AppCompatActivity() {
         binding = ActivityAddAndEditGameBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModelAddAndEdit = ViewModelProvider(this).get(AddAndEditViewModel::class.java)
         getId = intent.getStringExtra(ID_GAME).toString()
         getOrigin = intent.getIntExtra(ORIGIN_INTENT, 0)
 
@@ -69,107 +65,73 @@ class AddAndEditGameActivity : AppCompatActivity() {
     }
 
     private fun fromCamera() {
-        db.collection(DATABASE_GAMES).orderBy(ID)
-                .get()
-                .addOnSuccessListener {
-                    val id = getId.toInt()
-                    firebaseStorageRef.child(
-                            "${(firebaseAuth.currentUser?.uid ?: "")}/${id}gamePhoto.jpg"
-                    ).downloadUrl.addOnSuccessListener {uri ->
-                        val game = Game(id, uri.toString(), binding.tietDescriptionGame.text.toString(),
-                                binding.tietReleaseDataGame.text.toString(),
-                                binding.tietNameGame.text.toString()
-                        )
+        viewModelAddAndEdit.getUriFromStorage(getId.toInt())
+        viewModelAddAndEdit.uri.observe(this) {uri ->
+            val game = Game(getId.toInt(), uri.toString(), binding.tietDescriptionGame.text.toString(),
+                    binding.tietReleaseDataGame.text.toString(),
+                    binding.tietNameGame.text.toString()
+            )
 
-                        db.collection(DATABASE_GAMES).document("$id")
-                                .set(game)
-                                .addOnSuccessListener {
-                                    val intent = Intent(this, HomeActivity::class.java)
-                                    startActivity(intent)
-                                    finish()
-                                }
-                                .addOnFailureListener{
-                                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-                                }
-                    }
+            viewModelAddAndEdit.setGameValue(game, getId.toInt())
+            viewModelAddAndEdit.onSucess.observe(this) {
+                if(it) {
+                    val intent = Intent(this, HomeActivity::class.java)
+                    startActivity(intent)
+                    finish()
                 }
-                .addOnFailureListener{
-                    Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-                }
+            }
+        }
     }
 
     private fun addNewGame() {
-        db.collection(DATABASE_GAMES).orderBy(ID)
-            .get()
-            .addOnSuccessListener {
-                val id = it.size()
-                firebaseStorageRef.child(
-                    "${(firebaseAuth.currentUser?.uid ?: "")}/${id}gamePhoto.jpg"
-                ).downloadUrl.addOnSuccessListener {uri ->
-                    val game = Game(id, uri.toString(), binding.tietDescriptionGame.text.toString(),
+        viewModelAddAndEdit.getCollectionSize()
+        viewModelAddAndEdit.collectionSize.observe(this) {id ->
+            viewModelAddAndEdit.getUriFromStorage(id)
+            viewModelAddAndEdit.uri.observe(this) {uri ->
+                val game = Game(id, uri.toString(), binding.tietDescriptionGame.text.toString(),
                         binding.tietReleaseDataGame.text.toString(),
                         binding.tietNameGame.text.toString()
                     )
 
-                    db.collection(DATABASE_GAMES).document("$id")
-                        .set(game)
-                        .addOnSuccessListener {
-                            val intent = Intent(this, HomeActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
-                        .addOnFailureListener{
-                            Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-                        }
+                viewModelAddAndEdit.setGameValue(game, id)
+                viewModelAddAndEdit.onSucess.observe(this) {
+                    if(it) {
+                        val intent = Intent(this, HomeActivity::class.java)
+                        startActivity(intent)
+                        finish()
+                    }
                 }
             }
-            .addOnFailureListener{
-                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-            }
+        }
     }
 
     private fun editGame() {
-        db.collection(DATABASE_GAMES).whereEqualTo(ID, getId.toInt())
-            .get()
-            .addOnSuccessListener {
-                val id = getId.toInt()
-                firebaseStorageRef.child(
-                    "${(firebaseAuth.currentUser?.uid ?: "")}/${id}gamePhoto.jpg"
-                ).downloadUrl.addOnSuccessListener { uri ->
-                    val game = Game(id, uri.toString(), binding.tietDescriptionGame.text.toString(),
-                        binding.tietReleaseDataGame.text.toString(),
-                        binding.tietNameGame.text.toString()
-                    )
-
-                    db.collection(DATABASE_GAMES).document("$id")
-                        .set(game, SetOptions.merge())
-                        .addOnSuccessListener {
-                            val intent = Intent(this, GameDescriptionActivity::class.java)
-                            startActivity(intent)
-                            finish()
-                        }
-                        .addOnFailureListener{
-                            Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-                        }
-                }.addOnFailureListener {  }
+        viewModelAddAndEdit.getUriFromStorage(getId.toInt())
+        viewModelAddAndEdit.uri.observe(this) {uri ->
+            val game = Game(getId.toInt(), uri.toString(), binding.tietDescriptionGame.text.toString(),
+                    binding.tietReleaseDataGame.text.toString(),
+                    binding.tietNameGame.text.toString()
+            )
+            viewModelAddAndEdit.setGameValue(game, getId.toInt())
+            viewModelAddAndEdit.onSucess.observe(this) {
+                if(it) {
+                    val intent = Intent(this, HomeActivity::class.java)
+                    startActivity(intent)
+                    finish()
+                }
             }
-            .addOnFailureListener{
-                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-            }
+        }
     }
 
     private fun setUpGameInfo() {
-        db.collection(DATABASE_GAMES).whereEqualTo(ID, getId.toInt())
-            .get()
-            .addOnSuccessListener {query ->
-                query.documents.let {
-                    it.forEach {doc ->
-                        binding.tietNameGame.setText(doc[TITLE].toString())
-                        binding.tietReleaseDataGame.setText(doc[RELEASE].toString())
-                        binding.tietDescriptionGame.setText(doc[DESCRIPTION].toString())
-                        Glide.with(this).load(doc[PHOTO]).into(binding.ivGamePhoto)
-                    }
-                }
-            }.addOnFailureListener {  }
+        viewModelAddAndEdit.getGameById(getId.toInt())
+        viewModelAddAndEdit.document.observe(this) {
+            it.forEach { doc ->
+                binding.tietNameGame.setText(doc[TITLE].toString())
+                binding.tietReleaseDataGame.setText(doc[RELEASE].toString())
+                binding.tietDescriptionGame.setText(doc[DESCRIPTION].toString())
+                Glide.with(this).load(doc[PHOTO]).into(binding.ivGamePhoto)
+            }
+        }
     }
 }

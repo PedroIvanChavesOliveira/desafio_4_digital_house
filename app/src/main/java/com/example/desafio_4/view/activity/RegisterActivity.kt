@@ -5,27 +5,18 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Patterns
 import android.widget.EditText
-import android.widget.Toast
 import androidx.core.widget.doOnTextChanged
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.example.desafio_4.R
 import com.example.desafio_4.databinding.ActivityRegisterBinding
-import com.example.desafio_4.utils.Constants.Firebase.DATABASE_GAMES
-import com.example.desafio_4.utils.Constants.Firebase.DATABASE_USERS
+import com.example.desafio_4.viewModel.RegisterViewModel
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : AppCompatActivity() {
     private lateinit var binding: ActivityRegisterBinding
-    private val firebaseAuth by lazy {
-        Firebase.auth
-    }
-    private val db by lazy {
-        Firebase.firestore
-    }
+    private lateinit var viewModel: RegisterViewModel
     private var checkEmail = false
     private var checkName = false
     private var checkPassword = false
@@ -44,54 +35,39 @@ class RegisterActivity : AppCompatActivity() {
         validatingEditText(binding.tietPasswordRegister, binding.tilPasswordRegister, R.string.string_password)
         validatingEditText(binding.tietConfirmPasswordRegister, binding.tilConfirmPasswordRegister, R.string.string_confirm_password)
 
+        viewModel = ViewModelProvider(this).get(RegisterViewModel::class.java)
+
         binding.btRegister.setOnClickListener {
             createAccount(binding.tietEmailRegister.text.toString(), binding.tietPasswordRegister.text.toString())
-            finish()
         }
     }
 
     override fun onStart() {
         super.onStart()
-        val user = firebaseAuth.currentUser
-        updateUI(user)
-    }
-
-    private fun setUpUser() {
-        val user = hashMapOf(
-            "name" to binding.tietNameRegister.text.toString(),
-            "email" to binding.tietEmailRegister.text.toString()
-        )
-
-        db.collection(DATABASE_USERS)
-            .document(firebaseAuth.currentUser?.uid ?: "")
-            .set(user, SetOptions.merge())
-            .addOnSuccessListener {}
-            .addOnFailureListener{
-                Toast.makeText(this, it.localizedMessage, Toast.LENGTH_LONG).show()
-            }
+        viewModel.newUser.observe(this) {
+            updateUI(it)
+        }
     }
 
     private fun createAccount(email: String, password: String) {
         if(!activatingButtonRegister()){
             return
         }
-
-        firebaseAuth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    val user = firebaseAuth.currentUser
-                    updateUI(user)
-                    setUpUser()
-                } else {
-                    updateUI(null)
-                }
-            }
+        val user = hashMapOf(
+            "name" to binding.tietNameRegister.text.toString(),
+            "email" to binding.tietEmailRegister.text.toString()
+        )
+        viewModel.createNewUser(email, password, user)
+        viewModel.newUser.observe(this) {
+            updateUI(it)
+        }
     }
 
     private fun updateUI(user: FirebaseUser?) {
         if(user != null) {
             val intent = Intent(this, HomeActivity::class.java)
             startActivity(intent)
+            finish()
         }
     }
 

@@ -17,6 +17,8 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.observe
 import com.example.desafio_4.R
 import com.example.desafio_4.databinding.ActivityAddAndEditGameBinding
 import com.example.desafio_4.databinding.ActivityCameraBinding
@@ -31,6 +33,7 @@ import com.example.desafio_4.utils.Constants.CameraX.TAG_CAMERA
 import com.example.desafio_4.utils.Constants.Firebase.DATABASE_GAMES
 import com.example.desafio_4.utils.Constants.Firebase.ID_GAME
 import com.example.desafio_4.utils.Constants.Firebase.ORIGIN_INTENT
+import com.example.desafio_4.viewModel.CameraViewModel
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.ktx.firestore
@@ -50,15 +53,7 @@ class CameraActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
-    private val firebaseStorageRef by lazy {
-        Firebase.storage.reference
-    }
-    private val firebaseAuth by lazy {
-        Firebase.auth
-    }
-    private val db by lazy {
-        Firebase.firestore.collection(Constants.Firebase.DATABASE_USERS).document(firebaseAuth.currentUser?.uid ?: "")
-    }
+    private lateinit var viewModelCamera: CameraViewModel
     var getId = ""
     var getOrigin = 0
 
@@ -67,15 +62,15 @@ class CameraActivity : AppCompatActivity() {
         binding = ActivityCameraBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModelCamera = ViewModelProvider(this).get(CameraViewModel::class.java)
         getId = intent.getStringExtra(ID_GAME).toString()
         getOrigin = intent.getIntExtra(ORIGIN_INTENT, 0)
 
         if(getOrigin == 1) {
-            db.collection(DATABASE_GAMES).orderBy(ID)
-                .get()
-                .addOnSuccessListener {
-                    getId = it.size().toString()
-                }
+            viewModelCamera.getCollectionSize()
+            viewModelCamera.collectionSize.observe(this) {
+                getId = it.toString()
+            }
         }
 
         // Request camera permissions
@@ -111,18 +106,14 @@ class CameraActivity : AppCompatActivity() {
             try {
                 targetUri?.let {
                     val msg = "Foto salva com Sucesso!! Aguarde..."
-                    val gameUri = firebaseStorageRef.child(
-                            "${firebaseAuth.currentUser?.uid ?: ""}/${getId}gamePhoto.jpg"
-                    )
 
-                    gameUri.putFile(it).addOnSuccessListener {
-                        gameUri.downloadUrl.addOnSuccessListener {uri ->
-                            when(getOrigin) {
-                                1 -> { setUpByOrigin(true, false, uri) }
-                                2 -> { setUpByOrigin(false, true, uri) }
-                            }
+                    viewModelCamera.putFileToStorage(it, getId.toInt())
+                    viewModelCamera.getUri.observe(this) {uri ->
+                        when(getOrigin) {
+                            1 -> { setUpByOrigin(true, uri) }
+                            2 -> { setUpByOrigin(false, uri) }
                         }
-                    }.addOnFailureListener {  }
+                    }
                     Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
                 }
             } catch (exception: FileNotFoundException) {
@@ -155,39 +146,36 @@ class CameraActivity : AppCompatActivity() {
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
                     val msg = "Foto tirada com Sucesso!! Aguarde..."
-                    val gamePhoto = firebaseStorageRef.child(
-                        "${firebaseAuth.currentUser?.uid ?: ""}/$getId${savedUri.lastPathSegment}")
 
-                    gamePhoto.putFile(savedUri).addOnSuccessListener {
-                        gamePhoto.downloadUrl.addOnSuccessListener {uri ->
-                            when(getOrigin) {
-                                1 -> { setUpByOrigin(true, false, uri) }
-                                2 -> { setUpByOrigin(false, true, uri) }
-                            }
+                    viewModelCamera.putFileToStorage(savedUri, getId.toInt())
+                    viewModelCamera.getUri.observe(this@CameraActivity) {uri ->
+                        when(getOrigin) {
+                            1 -> { setUpByOrigin(true, uri) }
+                            2 -> { setUpByOrigin(false, uri) }
                         }
-                    }.addOnFailureListener {  }
-
+                    }
                     Toast.makeText(baseContext, msg, Toast.LENGTH_LONG).show()
-                    Log.d(TAG_CAMERA, msg)
                 }
             })
     }
 
-    private fun setUpByOrigin(game: Boolean, photo: Boolean, uri: Uri) {
+    private fun setUpByOrigin(game: Boolean, uri: Uri) {
         if(game) {
             val gameSet = Game(getId.toInt(), uri.toString(), "", "", "")
-            db.collection(DATABASE_GAMES).document("$getId")
-                    .set(gameSet, SetOptions.merge())
-                    .addOnSuccessListener {
-                        startAddGameActivity(3)
-                    }.addOnFailureListener {  }
+            viewModelCamera.setGameValue(gameSet, getId.toInt())
+            viewModelCamera.onSucess.observe(this) {
+                if(it) {
+                    startAddGameActivity(3)
+                }
+            }
         }else {
             val photoSet = hashMapOf(PHOTO to uri.toString())
-            db.collection(DATABASE_GAMES).document("$getId")
-                    .set(photoSet, SetOptions.merge())
-                    .addOnSuccessListener {
-                        startAddGameActivity(2)
-                    }.addOnFailureListener {  }
+            viewModelCamera.setPhotoValue(photoSet, getId.toInt())
+            viewModelCamera.onSucess.observe(this) {
+                if(it) {
+                    startAddGameActivity(2)
+                }
+            }
         }
     }
 
