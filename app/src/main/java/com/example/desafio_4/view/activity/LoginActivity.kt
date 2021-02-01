@@ -19,6 +19,7 @@ import com.example.desafio_4.utils.Constants.SharedPreferences.PASSWORD_SHAREDPR
 import com.example.desafio_4.databinding.ActivityLoginBinding
 import com.example.desafio_4.viewModel.LoginViewModel
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseUser
 
 class LoginActivity : AppCompatActivity() {
@@ -39,10 +40,15 @@ class LoginActivity : AppCompatActivity() {
         viewModelLogin = ViewModelProvider(this).get(LoginViewModel::class.java)
         sharedPreferences = getSharedPreferences(NAME_SHAREDPREFERENCE, Context.MODE_PRIVATE)
 
+        viewModelLogin.startAnalytics()
+
         validatingEditText(binding.tietEmail, binding.tilEmail, R.string.string_email)
         validatingEditText(binding.tietPassword, binding.tilPassword, R.string.string_password)
 
         binding.btRegister.setOnClickListener {
+            viewModelLogin.startAnalytic.observe(this) {
+                it.logEvent("register_button", null)
+            }
             val intent = Intent(this, RegisterActivity::class.java)
             startActivity(intent)
             sharedPreferences?.edit {
@@ -53,6 +59,12 @@ class LoginActivity : AppCompatActivity() {
         }
         binding.btLogIn.setOnClickListener {
             logInAccount(binding.tietEmail.text.toString(), binding.tietPassword.text.toString())
+            viewModelLogin.startAnalytic.observe(this) {
+                val bundle = Bundle()
+                val method = null
+                bundle.putString(FirebaseAnalytics.Param.METHOD, method)
+                it.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+            }
             sharedPreferences?.edit {
                 putString(EMAIL_SHAREDPREFERENCE, textInputEmail)
                 putString(PASSWORD_SHAREDPREFERENCE, textInputPassword)
@@ -60,6 +72,9 @@ class LoginActivity : AppCompatActivity() {
         }
 
         binding.cbRemember.setOnCheckedChangeListener { _, isChecked ->
+            viewModelLogin.startAnalytic.observe(this) {
+                it.logEvent("remember_button", null)
+            }
             sharedPreferences?.edit {
                 putBoolean(CHECKED_SHAREDPREFERENCE, isChecked)
                 putString(EMAIL_SHAREDPREFERENCE, textInputEmail)

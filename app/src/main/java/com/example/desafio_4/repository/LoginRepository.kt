@@ -1,5 +1,9 @@
 package com.example.desafio_4.repository
 
+import android.os.Bundle
+import com.google.firebase.analytics.FirebaseAnalytics
+import com.google.firebase.analytics.ktx.analytics
+import com.google.firebase.analytics.ktx.logEvent
 import com.google.firebase.auth.FirebaseAuthException
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.ktx.auth
@@ -10,9 +14,28 @@ class LoginRepository {
     private val firebaseAuth by lazy {
         Firebase.auth
     }
+    private val analytics by lazy {
+        Firebase.analytics
+    }
+
 
     suspend fun signInAuthentication(email: String, password: String): FirebaseUser? {
         firebaseAuth.signInWithEmailAndPassword(email, password).await()
         return firebaseAuth.currentUser ?: throw FirebaseAuthException("", "")
     }
+
+    fun startAnalytics(): FirebaseAnalytics {
+        return analytics
+    }
+
+//    fun analyticsLogInEvent() {
+//        val bundle = Bundle()
+//        val method = null
+//        bundle.putString(FirebaseAnalytics.Param.METHOD, method)
+//        analytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
+//    }
+//
+//    fun analyticsEvent(logName: String) {
+//        analytics.logEvent(logName, null)
+//    }
 }

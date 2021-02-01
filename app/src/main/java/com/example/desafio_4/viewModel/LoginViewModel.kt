@@ -4,11 +4,13 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.desafio_4.business.LoginBusiness
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
 class LoginViewModel: ViewModel() {
     var login: MutableLiveData<FirebaseUser?> = MutableLiveData()
+    var startAnalytic: MutableLiveData<FirebaseAnalytics> = MutableLiveData()
     private val business by lazy {
         LoginBusiness()
     }
@@ -22,4 +24,23 @@ class LoginViewModel: ViewModel() {
             }
         }
     }
+
+    fun startAnalytics() {
+        viewModelScope.launch {
+            startAnalytic.postValue(business.startAnalytics())
+        }
+    }
+
+//    fun analyticsEvent(logName: String) {
+//        viewModelScope.launch {
+//            business.analyticsEvent(logName)
+//        }
+//    }
+//
+//    fun analyticsLogInEvent() {
+//        viewModelScope.launch {
+//            business.analyticsLogInEvent()
+//        }
+//    }
+
 }
