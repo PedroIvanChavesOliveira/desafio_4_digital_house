@@ -27,15 +27,4 @@ class LoginRepository {
     fun startAnalytics(): FirebaseAnalytics {
         return analytics
     }
-
-//    fun analyticsLogInEvent() {
-//        val bundle = Bundle()
-//        val method = null
-//        bundle.putString(FirebaseAnalytics.Param.METHOD, method)
-//        analytics.logEvent(FirebaseAnalytics.Event.LOGIN, bundle)
-//    }
-//
-//    fun analyticsEvent(logName: String) {
-//        analytics.logEvent(logName, null)
-//    }
 }

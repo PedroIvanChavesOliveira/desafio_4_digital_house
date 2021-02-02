@@ -30,17 +30,4 @@ class LoginViewModel: ViewModel() {
             startAnalytic.postValue(business.startAnalytics())
         }
     }
-
-//    fun analyticsEvent(logName: String) {
-//        viewModelScope.launch {
-//            business.analyticsEvent(logName)
-//        }
-//    }
-//
-//    fun analyticsLogInEvent() {
-//        viewModelScope.launch {
-//            business.analyticsLogInEvent()
-//        }
-//    }
-
 }

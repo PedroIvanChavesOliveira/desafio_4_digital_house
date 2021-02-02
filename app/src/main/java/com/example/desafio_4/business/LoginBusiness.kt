@@ -22,12 +22,4 @@ class LoginBusiness {
     fun startAnalytics(): FirebaseAnalytics{
         return repository.startAnalytics()
     }
-
-//    fun analyticsEvent(logName: String) {
-//        repository.analyticsEvent(logName)
-//    }
-//
-//    fun analyticsLogInEvent() {
-//        repository.analyticsLogInEvent()
-//    }
 }
